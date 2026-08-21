@@ -1,6 +1,6 @@
 # DIGTIK — Download Intelligence & Guard/Threat Inspection Kit
 
-Assessment of file download capabilities for the Captain.Marvell SearchEngineClient against common web protection mechanisms.
+Assessment of file download capabilities for the Tiamat SearchEngineClient against common web protection mechanisms.
 
 Date: 2026-08-03
 

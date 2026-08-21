@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * AI Image Classifier for Captain Marvell system.
+ * AI Image Classifier for Tiamat system.
  *
  * Performs two functions:
  * 1. PRE-DOWNLOAD FILTER: Determines if an image URL is likely relevant content
@@ -567,8 +567,8 @@ public class ImageClassifier
     {
         StringBuilder name = new StringBuilder();
 
-        // Base: captain-marvell
-        name.append("captain-marvell");
+        // Base: tiamat
+        name.append("tiamat");
 
         // Content type
         if (!contentType.equals("image") && !contentType.equals("unknown"))

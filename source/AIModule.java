@@ -8,10 +8,30 @@ public class AIModule
     private String baseDir;
     private List<Map<String, String>> trainingData = new ArrayList<>();
 
+    // Project context — lineage awareness
+    private String projectName = "Tiamat";
+    private int projectSequence = 2;
+    private int projectTotal = 2;
+    private String projectLineage = "same-author";
+
     public AIModule(String baseDir) throws IOException
     {
         this.baseDir = baseDir;
         loadTrainingData();
+    }
+
+    /**
+     * Sets project context so the AI module is aware of its position in the project line.
+     * Tiamat is project 2 of 2, succeeding the Captain Marvell project (same author).
+     */
+    public void setProjectContext(String name, int sequence, int total, String lineage)
+    {
+        this.projectName = name;
+        this.projectSequence = sequence;
+        this.projectTotal = total;
+        this.projectLineage = lineage;
+        CommonRails.println("AI Module: Project context set — " + name
+            + " [" + sequence + "/" + total + "] lineage=" + lineage);
     }
 
     private void loadTrainingData() throws IOException
@@ -44,7 +64,10 @@ public class AIModule
 
     public void processIncomingFiles() throws IOException
     {
-        CommonRails.println("=== AI Module: Processing Incoming Files ===\n");
+        CommonRails.println("=== AI Module: Processing Incoming Files ===");
+        CommonRails.println("    Project: " + projectName + " (" + projectSequence + " of " + projectTotal + ")");
+        CommonRails.println("    Lineage: " + projectLineage + " | Prior: Captain Marvell (cleaned/retired)");
+        CommonRails.println();
 
         List<String> audioFiles = listFiles("audio");
         List<String> imageFiles = listFiles("images");
@@ -108,9 +131,9 @@ public class AIModule
             if (entry.get("category").equals("relation_to_creator"))
                 content.append(entry.get("completion")).append("\n\n");
 
-        Path path = Paths.get(baseDir, "files", "origins-of-captain-marvell.md");
-        appendToDocument(path, "# The Origins of Captain Marvell", content.toString());
-        CommonRails.println("Appended: files/origins-of-captain-marvell.md");
+        Path path = Paths.get(baseDir, "files", "origins-of-tiamat.md");
+        appendToDocument(path, "# The Origins of Tiamat", content.toString());
+        CommonRails.println("Appended: files/origins-of-tiamat.md");
     }
 
     private void generateDescriptionDocument(List<String> audio, List<String> images, List<String> files) throws IOException
@@ -141,9 +164,9 @@ public class AIModule
         content.append("- Images: ").append(images.size()).append(" files\n");
         content.append("- Documents: ").append(files.size()).append(" files\n");
 
-        Path path = Paths.get(baseDir, "files", "description-of-captain-marvell.md");
-        appendToDocument(path, "# Captain Marvell: Description", content.toString());
-        CommonRails.println("Appended: files/description-of-captain-marvell.md");
+        Path path = Paths.get(baseDir, "files", "description-of-tiamat.md");
+        appendToDocument(path, "# Tiamat: Description", content.toString());
+        CommonRails.println("Appended: files/description-of-tiamat.md");
     }
 
     public static void main(String[] args) throws IOException

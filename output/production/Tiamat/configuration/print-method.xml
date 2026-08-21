@@ -51,7 +51,7 @@
         <enforce-camel-case>true</enforce-camel-case>
         <append-trademark>false</append-trademark>
         <known-modules>
-            SearchEngineClient,AIModule,CommonRails,CaptainMarvell
+            SearchEngineClient,AIModule,CommonRails,Tiamat
         </known-modules>
         <preserved-acronyms>HTTP,HTTPS,URL,HTML,CSS,JS,JSON,XML,API,AI,ID,EDT,EST,UTC</preserved-acronyms>
     </block>
@@ -68,6 +68,21 @@
         <colored-output>true</colored-output>
         <reset-after-line>true</reset-after-line>
     </control>
+
+    <!-- SQUARE PROGRESS — 10x10 grid fill indicator for downloads -->
+    <!--
+      Fill order: bottom-right → left across row, then up one row.
+      100 cells total = 1% each. Target fill time ≤2000ms for ~1MB downloads.
+      Filled cells: orange █ (ANSI 208) — hardcoded in CommonRails.java
+      Empty cells: white █ (ANSI 255) — hardcoded in CommonRails.java
+      Colors use actual escape sequences and cannot be stored in XML.
+    -->
+    <square-progress>
+        <size>10</size>
+        <filled-char>█</filled-char>
+        <empty-char>█</empty-char>
+        <target-fill-ms>2000</target-fill-ms>
+    </square-progress>
 
     <!-- PARENT CLASS PREFIX -->
     <parent-class-prefix>

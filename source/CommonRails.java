@@ -7,17 +7,22 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 
 /**
- * CommonRails - Shared output utilities for Captain Marvell system.
+ * CommonRails - Shared output utilities for Tiamat system.
  * Loads print configuration from source/configuration/print-method.xml.
  * Uses grayscale fade-in printing (dark grey -> white) with ANSI 256-color codes.
  */
 public class CommonRails
 {
-    private static final String ORANGE_BLOCK = "\u001b[38;5;208m█\u001b[0m";
-    private static final String SPACE = " ";
-    private static final int TOTAL_BARS = 20;
     private static final int LINE_WIDTH = 120;
     private static final String RESET = "\u001B[0m";
+
+    // 10x10 square progress config
+    private static int SQUARE_SIZE = 10;
+    private static String SQUARE_FILLED_CHAR = "\u2588";  // █ full block
+    private static String SQUARE_EMPTY_CHAR = "\u2588";   // █ full block (white colored)
+    private static final String SQUARE_FILLED_ESC = "\u001b[38;5;208m";  // orange
+    private static final String SQUARE_EMPTY_ESC = "\u001b[38;5;255m";   // white
+    private static int SQUARE_TARGET_MS = 2000;  // target fill time for ~1MB download
 
     // Configurable from print-method.xml
     private static String PREFIX = "-- : ";
@@ -101,6 +106,17 @@ public class CommonRails
             {
                 Element c = (Element) control.item(0);
                 COLORED_OUTPUT = Boolean.parseBoolean(text(c, "colored-output", "true"));
+            }
+
+            NodeList square = doc.getElementsByTagName("square-progress");
+            if (square.getLength() > 0)
+            {
+                Element s = (Element) square.item(0);
+                SQUARE_SIZE = Integer.parseInt(text(s, "size", String.valueOf(SQUARE_SIZE)));
+                SQUARE_FILLED_CHAR = text(s, "filled-char", SQUARE_FILLED_CHAR);
+                SQUARE_EMPTY_CHAR = text(s, "empty-char", SQUARE_EMPTY_CHAR);
+                // Colors are hardcoded as actual escape sequences — XML cannot store them
+                SQUARE_TARGET_MS = Integer.parseInt(text(s, "target-fill-ms", String.valueOf(SQUARE_TARGET_MS)));
             }
         }
         catch (Exception ignored) {}
@@ -186,18 +202,33 @@ public class CommonRails
         }
 
         int clamped = Math.max(0, Math.min(100, percent));
-        int completedBars = (clamped * TOTAL_BARS) / 100;
-        int remainingBars = TOTAL_BARS - completedBars;
+        int totalCells = SQUARE_SIZE * SQUARE_SIZE;
+        int filledCells = (clamped * totalCells) / 100;
 
-        StringBuilder bar = new StringBuilder();
-        bar.append("[");
-        for (int i = 0; i < completedBars; i++)
-            bar.append(ORANGE_BLOCK);
-        for (int i = 0; i < remainingBars; i++)
-            bar.append(SPACE);
-        bar.append("] ").append(String.format("%3d%%", clamped));
+        // Build 10x10 square as a single-line compact representation
+        // Each row is 10 block chars separated by pipe, fill order: bottom-right → left, then up
+        // Rendered as: [row0|row1|row2|...|row9] where each row is 10 chars
+        StringBuilder square = new StringBuilder();
+        square.append("[");
+        for (int displayRow = 0; displayRow < SQUARE_SIZE; displayRow++)
+        {
+            for (int displayCol = 0; displayCol < SQUARE_SIZE; displayCol++)
+            {
+                int fillRow = (SQUARE_SIZE - 1) - displayRow;
+                int fillCol = (SQUARE_SIZE - 1) - displayCol;
+                int fillIndex = fillRow * SQUARE_SIZE + fillCol;
 
-        String msg = (label != null && !label.isEmpty()) ? label + " " + bar : bar.toString();
+                if (fillIndex < filledCells)
+                    square.append(SQUARE_FILLED_ESC).append(SQUARE_FILLED_CHAR).append(RESET);
+                else
+                    square.append(SQUARE_EMPTY_ESC).append(SQUARE_EMPTY_CHAR).append(RESET);
+            }
+            if (displayRow < SQUARE_SIZE - 1)
+                square.append("|");
+        }
+        square.append("]");
+
+        String labelStr = (label != null && !label.isEmpty()) ? " " + label : "";
 
         // Build component-style prefix
         String simple = owner != null
@@ -212,10 +243,102 @@ public class CommonRails
         String padded = padClassname(simple);
 
         String line = PREFIX + "[" + OID_LABEL + ": " + oidColor + hashStr + RESET + "] ["
-            + DATE_LABEL + ": " + ts + "] " + padded + " " + msg;
+            + DATE_LABEL + ": " + ts + "] " + padded + " " + square + labelStr;
 
         System.out.print("\r" + line);
         System.out.flush();
+    }
+
+    // =========================================================================
+    // 10x10 SQUARE PROGRESS INDICATOR
+    // Fills from bottom-right to left, then up one row at a time.
+    // 100 cells = 100%. Target fill: ≤2 seconds for a ~1MB image download.
+    // =========================================================================
+
+    /**
+     * Renders a 10x10 grid progress indicator (standalone multi-line version).
+     * Fill order: bottom-right → left across row, then up to next row.
+     * Each cell = 1%. At 100%, the full square is filled orange on white.
+     *
+     * Uses ANSI cursor movement to render multi-line in-place.
+     *
+     * @param percent 0-100 completion
+     * @param label   optional label to print above the square
+     */
+    public static void printSquareProgress(int percent, String label)
+    {
+        int clamped = Math.max(0, Math.min(100, percent));
+        int totalCells = SQUARE_SIZE * SQUARE_SIZE;
+        int filledCells = (clamped * totalCells) / 100;
+
+        StringBuilder output = new StringBuilder();
+
+        if (label != null && !label.isEmpty())
+            output.append("  ").append(label).append(" ").append(clamped).append("%\n");
+
+        for (int displayRow = 0; displayRow < SQUARE_SIZE; displayRow++)
+        {
+            output.append("  ");
+            for (int displayCol = 0; displayCol < SQUARE_SIZE; displayCol++)
+            {
+                int fillRow = (SQUARE_SIZE - 1) - displayRow;
+                int fillCol = (SQUARE_SIZE - 1) - displayCol;
+                int fillIndex = fillRow * SQUARE_SIZE + fillCol;
+
+                if (fillIndex < filledCells)
+                    output.append(SQUARE_FILLED_ESC).append(SQUARE_FILLED_CHAR).append(RESET);
+                else
+                    output.append(SQUARE_EMPTY_ESC).append(SQUARE_EMPTY_CHAR).append(RESET);
+            }
+            output.append("\n");
+        }
+
+        // Move cursor up to overwrite on next call (size + 1 for label line)
+        int linesUp = SQUARE_SIZE + (label != null && !label.isEmpty() ? 1 : 0);
+        output.append("\033[").append(linesUp).append("A");
+
+        System.out.print(output);
+        System.out.flush();
+    }
+
+    /**
+     * Finalizes the square progress display — prints the completed grid
+     * without the cursor-up escape so subsequent output flows normally.
+     */
+    public static void finalizeSquareProgress(String label)
+    {
+        StringBuilder output = new StringBuilder();
+
+        if (label != null && !label.isEmpty())
+            output.append("  ").append(label).append(" 100%\n");
+
+        for (int displayRow = 0; displayRow < SQUARE_SIZE; displayRow++)
+        {
+            output.append("  ");
+            for (int displayCol = 0; displayCol < SQUARE_SIZE; displayCol++)
+                output.append(SQUARE_FILLED_ESC).append(SQUARE_FILLED_CHAR).append(RESET);
+            output.append("\n");
+        }
+
+        System.out.print(output);
+        System.out.flush();
+    }
+
+    /**
+     * Returns the target fill time in milliseconds for the square progress indicator.
+     * Configured via print-method.xml <square-progress><target-fill-ms>.
+     * Default: 2000ms (should fill in ≤2 seconds for ~1MB downloads).
+     */
+    public static int getSquareTargetMs() { return SQUARE_TARGET_MS; }
+
+    /**
+     * Returns the per-cell delay in ms to hit the target fill time.
+     * For a 10x10 grid (100 cells) at 2000ms target = 20ms per cell.
+     */
+    public static int getSquareCellDelayMs()
+    {
+        int totalCells = SQUARE_SIZE * SQUARE_SIZE;
+        return Math.max(1, SQUARE_TARGET_MS / totalCells);
     }
 
     public static void printThreadStatus()

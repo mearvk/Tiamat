@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 import java.util.regex.*;
 
 /**
- * ImageDownloadStrategy — A dedicated image acquisition module for Captain Marvell.
+ * ImageDownloadStrategy — A dedicated image acquisition module for Tiamat.
  *
  * Designed to maximize relevant image yield when general search crawling produces
  * weak results. Operates with explicit control over source selection, relevance
@@ -69,11 +69,11 @@ public class ImageDownloadStrategy
 
     // Known high-yield sources for comic/superhero imagery
     private static final String[] GALLERY_SOURCES = {
-        "https://en.wikipedia.org/wiki/Captain_Marvel",
-        "https://marvel.fandom.com/wiki/Captain_Marvel",
-        "https://www.marvel.com/characters/captain-marvel-carol-danvers",
-        "https://comicvine.gamespot.com/captain-marvel/4005-2268/",
-        "https://www.deviantart.com/tag/captainmarvel",
+        "https://en.wikipedia.org/wiki/Tiamat",
+        "https://marvel.fandom.com/wiki/Tiamat",
+        "https://www.marvel.com/characters/Tiamat",
+        "https://comicvine.gamespot.com/Tiamat",
+        "https://www.deviantart.com/tag/Tiamat",
     };
 
     // File extensions considered valid images
@@ -541,7 +541,7 @@ public class ImageDownloadStrategy
     // =========================================================================
 
     /**
-     * Scores a URL (and optional surrounding context) for relevance to Captain Marvell.
+     * Scores a URL (and optional surrounding context) for relevance to Tiamat.
      * Returns 0.0 - 1.0.
      *
      * Scoring factors:
@@ -708,7 +708,7 @@ public class ImageDownloadStrategy
 
         // Last resort: timestamp-based name
         String ext = guessExtension(response.headers().firstValue("content-type").orElse("image/jpeg"));
-        return "captain_marvell_" + System.currentTimeMillis() + ext;
+        return "tiamat_" + System.currentTimeMillis() + ext;
     }
 
     // =========================================================================
@@ -722,7 +722,7 @@ public class ImageDownloadStrategy
     public void execute()
     {
         CommonRails.println("╔══════════════════════════════════════════════════════════╗");
-        CommonRails.println("║  IMAGE DOWNLOAD STRATEGY — Captain Marvell              ║");
+        CommonRails.println("║  IMAGE DOWNLOAD STRATEGY — Tiamat                       ║");
         CommonRails.println("║  Relevance threshold: " + relevanceThreshold
             + "  Min size: " + minFileSize + "B             ║");
         CommonRails.println("╚══════════════════════════════════════════════════════════╝");

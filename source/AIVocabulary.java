@@ -6,7 +6,7 @@ import java.util.regex.*;
 import java.util.stream.*;
 
 /**
- * AI Vocabulary Engine for Captain Marvell Image Recognition.
+ * AI Vocabulary Engine for Tiamat Image Recognition.
  *
  * Provides a 100,000-word vocabulary organized into domains relevant to
  * image classification, naming, and content recognition. The vocabulary
@@ -562,7 +562,7 @@ public class AIVocabulary
             new String[]{"marvel.com", "character", "portrait", "headshot", "hero"},
             "character-portrait",
             "mixed", "high", 0.95,
-            new String[]{"captain-marvell", "portrait", "official"}
+            new String[]{"tiamat", "portrait", "official"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -570,7 +570,7 @@ public class AIVocabulary
             new String[]{"fandom.com", "wiki", "character", "infobox", "profile"},
             "character-portrait",
             "mixed", "high", 0.90,
-            new String[]{"captain-marvell", "portrait", "wiki"}
+            new String[]{"tiamat", "portrait", "wiki"}
         ));
 
         // --- COMIC COVERS ---
@@ -579,7 +579,7 @@ public class AIVocabulary
             new String[]{"cover", "issue", "vol", "#", "comic"},
             "comic-cover",
             "drawing", "high", 0.92,
-            new String[]{"captain-marvell", "cover", "comic"}
+            new String[]{"tiamat", "cover", "comic"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -587,7 +587,7 @@ public class AIVocabulary
             new String[]{"variant", "exclusive", "incentive", "1:25", "1:50"},
             "variant-cover",
             "drawing", "high", 0.90,
-            new String[]{"captain-marvell", "variant", "cover"}
+            new String[]{"tiamat", "variant", "cover"}
         ));
 
         // --- MOVIE/MCU CONTENT ---
@@ -596,7 +596,7 @@ public class AIVocabulary
             new String[]{"poster", "theatrical", "movie", "film", "imax"},
             "movie-poster",
             "photo", "high", 0.93,
-            new String[]{"captain-marvell", "poster", "movie"}
+            new String[]{"tiamat", "poster", "movie"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -604,7 +604,7 @@ public class AIVocabulary
             new String[]{"still", "scene", "screenshot", "frame", "screencap"},
             "movie-still",
             "photo", "medium", 0.85,
-            new String[]{"captain-marvell", "still", "scene"}
+            new String[]{"tiamat", "still", "scene"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -612,7 +612,7 @@ public class AIVocabulary
             new String[]{"behind", "scenes", "bts", "set-photo", "on-set"},
             "behind-the-scenes",
             "photo", "medium", 0.80,
-            new String[]{"captain-marvell", "bts", "photo"}
+            new String[]{"tiamat", "bts", "photo"}
         ));
 
         // --- FAN ART ---
@@ -621,7 +621,7 @@ public class AIVocabulary
             new String[]{"deviantart", "deviant", "fan-art", "fanart"},
             "fan-art",
             "drawing", "medium", 0.75,
-            new String[]{"captain-marvell", "fanart", "drawing"}
+            new String[]{"tiamat", "fanart", "drawing"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -629,7 +629,7 @@ public class AIVocabulary
             new String[]{"artstation", "concept", "digital-art", "illustration"},
             "professional-fanart",
             "drawing", "high", 0.85,
-            new String[]{"captain-marvell", "fanart", "professional"}
+            new String[]{"tiamat", "fanart", "professional"}
         ));
 
         // --- COSPLAY ---
@@ -638,7 +638,7 @@ public class AIVocabulary
             new String[]{"cosplay", "costume", "cos", "convention", "con-photo"},
             "cosplay",
             "photo", "medium", 0.80,
-            new String[]{"captain-marvell", "cosplay", "photo"}
+            new String[]{"tiamat", "cosplay", "photo"}
         ));
 
         // --- MERCHANDISE ---
@@ -647,7 +647,7 @@ public class AIVocabulary
             new String[]{"toy", "figure", "action-figure", "hot-toys", "hasbro", "funko"},
             "merchandise",
             "photo", "medium", 0.70,
-            new String[]{"captain-marvell", "merchandise", "toy"}
+            new String[]{"tiamat", "merchandise", "toy"}
         ));
 
         learnerStrips.add(new LearnerStrip(
@@ -655,7 +655,7 @@ public class AIVocabulary
             new String[]{"statue", "bust", "sideshow", "kotobukiya", "diamond-select"},
             "collectible",
             "photo", "high", 0.75,
-            new String[]{"captain-marvell", "collectible", "statue"}
+            new String[]{"tiamat", "collectible", "statue"}
         ));
 
         // --- WALLPAPERS ---
@@ -664,7 +664,7 @@ public class AIVocabulary
             new String[]{"wallpaper", "desktop", "1920x1080", "2560x1440", "3840x2160", "4k"},
             "wallpaper",
             "mixed", "high", 0.88,
-            new String[]{"captain-marvell", "wallpaper", "desktop"}
+            new String[]{"tiamat", "wallpaper", "desktop"}
         ));
 
         // --- CONCEPT ART ---
@@ -673,7 +673,7 @@ public class AIVocabulary
             new String[]{"concept", "concept-art", "production", "pre-production", "keyframe"},
             "concept-art",
             "drawing", "high", 0.90,
-            new String[]{"captain-marvell", "concept-art"}
+            new String[]{"tiamat", "concept-art"}
         ));
 
         // --- SCREENSHOTS/PANELS ---
@@ -682,7 +682,7 @@ public class AIVocabulary
             new String[]{"panel", "page", "interior", "preview", "read-online"},
             "comic-panel",
             "drawing", "medium", 0.78,
-            new String[]{"captain-marvell", "panel", "comic"}
+            new String[]{"tiamat", "panel", "comic"}
         ));
 
         // --- PROMOTIONAL ---
@@ -691,7 +691,7 @@ public class AIVocabulary
             new String[]{"promo", "promotional", "press", "marketing", "banner"},
             "promotional",
             "mixed", "high", 0.82,
-            new String[]{"captain-marvell", "promo"}
+            new String[]{"tiamat", "promo"}
         ));
 
         // --- ICONS/LOGOS (REJECT) ---
@@ -733,7 +733,7 @@ public class AIVocabulary
             new String[]{"featured", "hero-image", "article", "news", "wp-content/uploads"},
             "news-article-image",
             "photo", "medium", 0.80,
-            new String[]{"captain-marvell", "news"}
+            new String[]{"tiamat", "news"}
         ));
 
         // --- VINTAGE/CLASSIC ---
@@ -742,7 +742,7 @@ public class AIVocabulary
             new String[]{"golden-age", "silver-age", "1960", "1970", "classic", "original"},
             "vintage-comic",
             "drawing", "medium", 0.85,
-            new String[]{"captain-marvell", "vintage", "classic"}
+            new String[]{"tiamat", "vintage", "classic"}
         ));
 
         totalStrips = learnerStrips.size();
@@ -755,7 +755,7 @@ public class AIVocabulary
     private void buildCompoundTerms()
     {
         // Character-specific compound terms
-        compoundTerms.put("captain marvel", "captain-marvell");
+        compoundTerms.put("captain marvel", "tiamat");
         compoundTerms.put("carol danvers", "carol-danvers");
         compoundTerms.put("ms marvel", "ms-marvel");
         compoundTerms.put("captain america", "captain-america");

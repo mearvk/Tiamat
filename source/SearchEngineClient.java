@@ -93,7 +93,7 @@ public class SearchEngineClient
         }
 
         categories = config.getProperty("categories", "audio,images,files").split(",");
-        queries = config.getProperty("queries", "captain marvell").split(",");
+        queries = config.getProperty("queries", "tiamat").split(",");
 
         // Load crawler config
         maxRedirects = Integer.parseInt(config.getProperty("max.redirects", "1000"));
@@ -1197,7 +1197,7 @@ public class SearchEngineClient
      */
     public void searchAll()
     {
-        CommonRails.println("=== Captain Marvell Search Engine Client ===");
+        CommonRails.println("=== Tiamat Search Engine Client ===");
         CommonRails.println("Strategy: " + activeStrategyName.toUpperCase() + " (importance=" + searchImportance + ")");
         CommonRails.println("Config: maxRedirects=" + maxRedirects + " parseDepth=" + strategyParseDepth
             + " maxThreads=" + maxThreads + " crawlDelay=" + crawlDelayMs + "ms");
