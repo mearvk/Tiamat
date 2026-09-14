@@ -1,0 +1,139 @@
+#sleela 1.1
+//
+// CommonRails.sleela — Sleela (Wrapper™) port of CommonRails.java.
+// ================================================================
+// Shared output utilities for the Tiamat system. The Java version loads its
+// layout from print-method.xml, does grayscale ANSI fade-in printing, and
+// renders a 21x21 progress square (bottom-right -> left -> up). The Sleela
+// surface has no XML parsing, ANSI escapes, timers, or arrays, so this port:
+//   - keeps the professional component line (Object ID / Current / message);
+//   - keeps the 21x21 progress square with the identical fill math;
+//   - drops the fade animation (no timing/color on the surface).
+// The lexer decodes only \n \t \r \\ \" so the block glyphs are raw UTF-8.
+//
+class CommonRails {
+
+    // ---- Square + layout configuration (mirrors print-method.xml) -------
+    int SQUARE_SIZE   = 21;   // 21x21 == 441 cells
+    int OID_WIDTH     = 10;   // Object ID zero-padded to 10 digits
+    int CURRENT_WIDTH = 39;   // Current field padded to a fixed inner width
+
+    String FULL  = "█";   // filled cell (orange in the Java edition)
+    String LIGHT = "░";   // empty cell  (white in the Java edition)
+
+    String repeat(String s, int n) {
+        String out = "";
+        int i = 0;
+        while (i < n) {
+            out = out + s;
+            i = i + 1;
+        }
+        return out;
+    }
+
+    int digitCount(int v) {
+        int n = v;
+        if (n < 0) {
+            n = -n;
+        }
+        int count = 1;
+        while (n >= 10) {
+            n = n / 10;
+            count = count + 1;
+        }
+        return count;
+    }
+
+    String padZeros(int value, int width) {
+        int need = width - digitCount(value);
+        if (need <= 0) {
+            return "" + value;
+        }
+        return repeat("0", need) + value;
+    }
+
+    // padCurrent(name, nameChars) — "[Current: @Name" + spaces to width + "]".
+    String padCurrent(String name, int nameChars) {
+        String inner = "Current: @" + name;
+        int pad = CURRENT_WIDTH - (10 + nameChars);
+        if (pad < 0) {
+            pad = 0;
+        }
+        return "[" + inner + repeat(" ", pad) + "]";
+    }
+
+    // printSystemComponent — the professional component line. Java signature is
+    // printSystemComponent(owner, hash, line); here owner/hash become the class
+    // name (+ its char count) and an object id.
+    void printSystemComponent(String name, int nameChars, int oid, String message) {
+        print("-- : "
+            + "[Object ID: " + padZeros(oid, OID_WIDTH) + "] "
+            + padCurrent(name, nameChars) + " "
+            + ". " + message + " .");
+    }
+
+    // ---- 21x21 progress square (identical fill math to the Java edition) --
+    // display cell (r,c) -> fill index ((SIZE-1)-r)*SIZE + ((SIZE-1)-c);
+    // a cell is filled when its fill index < filledCells.
+    void printSquare(int filledCells) {
+        int total = SQUARE_SIZE * SQUARE_SIZE;
+        int filled = filledCells;
+        if (filled < 0) {
+            filled = 0;
+        }
+        if (filled > total) {
+            filled = total;
+        }
+        int displayRow = 0;
+        while (displayRow < SQUARE_SIZE) {
+            String row = "";
+            int displayCol = 0;
+            while (displayCol < SQUARE_SIZE) {
+                int fillRow = (SQUARE_SIZE - 1) - displayRow;
+                int fillCol = (SQUARE_SIZE - 1) - displayCol;
+                int fillIndex = fillRow * SQUARE_SIZE + fillCol;
+                if (fillIndex < filled) {
+                    row = row + FULL;
+                } else {
+                    row = row + LIGHT;
+                }
+                displayCol = displayCol + 1;
+            }
+            print(row);
+            displayRow = displayRow + 1;
+        }
+    }
+
+    int percentToCells(int percent) {
+        int p = percent;
+        if (p < 0) {
+            p = 0;
+        }
+        if (p > 100) {
+            p = 100;
+        }
+        return (p * (SQUARE_SIZE * SQUARE_SIZE)) / 100;
+    }
+
+    // Single-pixel indicator: the square collapsed to one glyph.
+    void printPixel(int filledCells) {
+        if (filledCells > 0) {
+            print(FULL);
+        } else {
+            print(LIGHT);
+        }
+    }
+
+    void main() {
+        print("=== CommonRails (Sleela edition) ===");
+        printSystemComponent("SearchEngineClient", 18, 1234, "category images now crawling");
+        printSystemComponent("CommonRails", 11, 441, "square progress ready");
+        print("");
+        print("single pixel (0% then 100%):");
+        printPixel(percentToCells(0));
+        printPixel(percentToCells(100));
+        print("");
+        print("21x21 square @ 100%:");
+        printSquare(percentToCells(100));
+    }
+}

@@ -1,0 +1,108 @@
+#sleela 1.1
+//
+// ImageClassifier.sleela — Sleela (Wrapper™) port of ImageClassifier.java.
+// ========================================================================
+// The AI image classifier: (1) a pre-download relevance filter and (2) a
+// source-quality / content-type inference used for contextual naming.
+//
+// The Java version scans URL/alt/page/context strings with String.contains(),
+// regex Patterns, and Map lookups. The Sleela surface has no substring search,
+// regex, or maps (only literals, +, ==, print), so runtime string scanning is
+// not expressible. This port therefore preserves the *scoring model* exactly —
+// the same weights, bonuses, penalties, and Math.min/Math.max clamps — but
+// takes the detected signals as parameters (keyword-hit count and boolean
+// flags) that the Java code would have derived from its scans. The numeric
+// behavior is identical for identical signals.
+//
+class ImageClassifier {
+
+    // Helpers replacing Math.min / Math.max on doubles.
+    double dmin(double a, double b) {
+        if (a < b) {
+            return a;
+        }
+        return b;
+    }
+    double dmax(double a, double b) {
+        if (a > b) {
+            return a;
+        }
+        return b;
+    }
+
+    // scoreRelevance — faithful port of the Java scoring in the classifier.
+    // Signals (derived by the Java scans) are passed in:
+    //   keywordHits           number of RELEVANCE_KEYWORDS found in the combined text
+    //   onRelevantPage        page mentions captain/marvel/marvell/avenger
+    //   altMeaningful         alt text non-empty and length > 10
+    //   quality               inferred source quality: official/wiki/news/fanart/...
+    //   stockPhoto            url mentions shutterstock/gettyimages/istockphoto/stock
+    //   adNetwork             url mentions doubleclick/googlesyndication/adnxs/adsense
+    //   imagePath             url has /image|/photo|/media|/upload
+    double scoreRelevance(int keywordHits, boolean onRelevantPage,
+                          boolean altMeaningful, String quality,
+                          boolean stockPhoto, boolean adNetwork, boolean imagePath) {
+        double score = 0.0;
+
+        // More keyword hits = higher relevance (0.15 each, capped at 0.6).
+        score = score + dmin(keywordHits * 0.15, 0.6);
+
+        // Bonus for being on a relevant page.
+        if (onRelevantPage) {
+            score = score + 0.25;
+        }
+
+        // Bonus for meaningful alt text.
+        if (altMeaningful) {
+            score = score + 0.1;
+        }
+
+        // Bonus for known quality sources.
+        if (quality == "official" || quality == "wiki") {
+            score = score + 0.2;
+        } else if (quality == "news" || quality == "fanart") {
+            score = score + 0.15;
+        }
+
+        // Penalty for generic stock photo sites.
+        if (stockPhoto) {
+            score = score - 0.3;
+        }
+
+        // Penalty for ad networks.
+        if (adNetwork) {
+            score = score - 0.5;
+        }
+
+        // Bonus for image-specific paths.
+        if (imagePath) {
+            score = score + 0.1;
+        }
+
+        // Clamp to [0, 1].
+        return dmax(0.0, dmin(1.0, score));
+    }
+
+    // classify — the pre-download accept/reject decision. The Java default
+    // threshold is 0.3 (accept some false positives to avoid missing content).
+    boolean isRelevant(double score, double threshold) {
+        return score >= threshold;
+    }
+
+    void main() {
+        print("=== ImageClassifier (Sleela edition) ===");
+
+        // Case A: 3 keyword hits, on a relevant wiki page, meaningful alt,
+        // image path — a strong keep.
+        double a = scoreRelevance(3, true, true, "wiki", false, false, true);
+        print("A score=" + a + " keep=" + isRelevant(a, 0.3));
+
+        // Case B: an ad-network stock image with no keyword hits — a reject.
+        double b = scoreRelevance(0, false, false, "unknown", true, true, false);
+        print("B score=" + b + " keep=" + isRelevant(b, 0.3));
+
+        // Case C: borderline — 1 hit, fanart source, no page bonus.
+        double c = scoreRelevance(1, false, false, "fanart", false, false, false);
+        print("C score=" + c + " keep=" + isRelevant(c, 0.3));
+    }
+}

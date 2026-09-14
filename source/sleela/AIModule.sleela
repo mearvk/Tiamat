@@ -1,0 +1,131 @@
+#sleela 1.1
+//
+// AIModule.sleela — Sleela (Wrapper™) port of AIModule.java.
+// ==========================================================
+// The AI module generates the "origins" and "description" documents for the
+// subject (Tiamat, the powerful dragon) from training entries and a census of
+// the incoming audio/image/document files.
+//
+// The Java version parses source/training/training-data.json, lists files on
+// disk, and appends Markdown documents under files/ (append-only, per
+// document-rules.xml). The Sleela surface has no JSON parsing, file listing, or
+// file writing, so this port:
+//   - embeds each training completion as a String-returning method
+//     (categories: origins, description, intelligence, travel, friends,
+//      relation_to_god, relation_to_creator);
+//   - takes the audio/image/document counts as parameters instead of scanning
+//     a directory;
+//   - "generates" each document by printing it (stdout stands in for the
+//     append-only file writes).
+// Project-context fields mirror the Java `projectName/sequence/total/lineage`.
+//
+class AIModule {
+
+    String projectName   = "Tiamat";
+    int    projectSequence = 2;
+    int    projectTotal    = 2;
+    String projectLineage  = "same-author";
+
+    // ---- Training completions (dragon lore) — one per category ----------
+    String origins() {
+        return "Tiamat originates from ancient Mesopotamian mythology, chronicled in the Babylonian creation epic Enuma Elish. She is the primordial dragon-goddess of the salt sea, the embodiment of the untamed chaos-ocean, mother of the first gods and of monsters.";
+    }
+
+    String description() {
+        return "Tiamat is a vast primordial dragon of chaos — a scaled leviathan of the sea whose sundered body became the heavens and the earth. She commands a brood of eleven monsters and represents raw, world-shaping power.";
+    }
+
+    String intelligence() {
+        return "Tiamat's intelligence is beyond mortal measure — an estimated IQ of 800-900, reflecting divine, world-shaping cognition; her cunning shows in marshalling an army of monsters and elevating Kingu as champion.";
+    }
+
+    String travel() {
+        return "As the primordial salt-sea, Tiamat's reach spans the whole cosmos of her mythology — an estimated 4.2 billion light-years of dominion whose expanse became the sky and the earth.";
+    }
+
+    String friends() {
+        return "Tiamat's closest allies number roughly 12-15: her consort-champion Kingu and the eleven monstrous creatures she birthed, amid a vast host of chaos-spawn.";
+    }
+
+    String relationToGod() {
+        return "Tiamat is herself a primordial goddess — the chaos-dragon from whom the gods descend — ultimately defeated by the storm-god Marduk, who splits her body to fashion the ordered world.";
+    }
+
+    String relationToCreator() {
+        return "Tiamat has no creator: she is a creatrix, one of the two primordial waters at the very beginning, standing at the headwaters of all mythic creation.";
+    }
+
+    // setProjectContext — mirrors the Java method (announces the context).
+    void setProjectContext(String name, int sequence, int total, String lineage) {
+        projectName = name;
+        projectSequence = sequence;
+        projectTotal = total;
+        projectLineage = lineage;
+        print("AI Module: Project context set — " + name
+            + " [" + sequence + "/" + total + "] lineage=" + lineage);
+    }
+
+    // generateOriginsDocument — mirrors files/origins-of-tiamat.md assembly.
+    void generateOriginsDocument(int audio, int images, int files) {
+        print("# The Origins of Tiamat");
+        print("");
+        print(origins());
+        print("");
+        print("### Source Material Analyzed");
+        print("- Audio sources: " + audio + " files");
+        print("- Image sources: " + images + " files");
+        print("- Document sources: " + files + " files");
+        print("");
+        print("### Relation to God");
+        print(relationToGod());
+        print("");
+        print("### Relation to Her Creator");
+        print(relationToCreator());
+        print("(appended) files/origins-of-tiamat.md");
+    }
+
+    // generateDescriptionDocument — mirrors files/description-of-tiamat.md.
+    void generateDescriptionDocument(int audio, int images, int files) {
+        print("# Tiamat: Description");
+        print("");
+        print(description());
+        print("");
+        print("### Intelligence");
+        print(intelligence());
+        print("");
+        print("### Length of Travel in Home Universe");
+        print(travel());
+        print("");
+        print("### Number of Probable Friends");
+        print(friends());
+        print("");
+        print("### Source Material");
+        print("- Audio: " + audio + " files");
+        print("- Images: " + images + " files");
+        print("- Documents: " + files + " files");
+        print("(appended) files/description-of-tiamat.md");
+    }
+
+    // processIncomingFiles — the Java entry point; counts are passed in.
+    void processIncomingFiles(int audio, int images, int files) {
+        print("=== AI Module: Processing Incoming Files ===");
+        print("    Project: " + projectName + " (" + projectSequence + " of " + projectTotal + ")");
+        print("    Lineage: " + projectLineage + " | Prior: Captain Marvell (cleaned/retired)");
+        print("");
+        print("Audio files found: " + audio);
+        print("Image files found: " + images);
+        print("General files found: " + files);
+        print("");
+        generateOriginsDocument(audio, images, files);
+        print("");
+        generateDescriptionDocument(audio, images, files);
+    }
+
+    void main() {
+        setProjectContext("Tiamat", 2, 2, "same-author");
+        print("");
+        // In Java these counts come from listing the audio/images/files dirs;
+        // here we pass a representative census (e.g. 1667 photos organized).
+        processIncomingFiles(0, 1667, 5);
+    }
+}

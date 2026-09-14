@@ -1,0 +1,107 @@
+#sleela 1.1
+//
+// SearchEngineClient.sleela — Sleela (Wrapper™) port of SearchEngineClient.java.
+// ==============================================================================
+// Drives the search: selects a page-parsing strategy from the configured
+// search.importance, then crawls each query following redirects up to a cap,
+// dropping chains that drift off-topic.
+//
+// The Java version loads document-rules.xml, builds queries, and uses
+// HttpClient to fetch/redirect and parse HTML. The Sleela surface has no XML,
+// networking, or substring search, so this port preserves the two computable
+// cores exactly:
+//   1. selectStrategy(importance) — the importance->strategy bands from
+//      document-rules.xml / search-engines.config (0-1800 fibonacci,
+//      1801-3600 galileo, 3601-5400 davinci, 5401-7200 marconi,
+//      7201-9000 fermi), and each strategy's parse-depth;
+//   2. the bounded redirect-follow loop (fetchWithRedirects) as an integer
+//      hop-count simulation with a max-redirects cap.
+// The actual HTTP fetch and the relevance/off-topic scan are represented by
+// passed-in signals rather than executed.
+//
+class SearchEngineClient {
+
+    int maxRedirects = 10;   // search-engines.config max.redirects
+
+    // selectStrategy — maps a 0..9000 importance to the strategy name.
+    String selectStrategy(int importance) {
+        if (importance <= 1800) {
+            return "fibonacci";
+        }
+        if (importance <= 3600) {
+            return "galileo";
+        }
+        if (importance <= 5400) {
+            return "davinci";
+        }
+        if (importance <= 7200) {
+            return "marconi";
+        }
+        return "fermi";
+    }
+
+    // parseDepth — the <parse-depth> each strategy declares in document-rules.xml.
+    int parseDepth(String strategy) {
+        if (strategy == "fibonacci") {
+            return 1;
+        }
+        if (strategy == "galileo") {
+            return 3;
+        }
+        if (strategy == "davinci") {
+            return 5;
+        }
+        if (strategy == "marconi") {
+            return 8;
+        }
+        return 10;   // fermi
+    }
+
+    // followLinks — fibonacci is the only strategy that does not follow links.
+    boolean followsLinks(String strategy) {
+        return !(strategy == "fibonacci");
+    }
+
+    // fetchWithRedirects — bounded redirect-follow loop. In Java each hop is an
+    // HTTP request whose Location header (or an off-topic body) decides whether
+    // to continue; here `hopIsRedirect`/`hopRelevant` stand in for those two
+    // per-hop signals. `redirectHops` is how many 3xx hops the chain would take.
+    // Returns the number of hops actually followed; prints the outcome.
+    int fetchWithRedirects(String url, int redirectHops, boolean staysRelevant) {
+        int hop = 0;
+        while (hop < redirectHops) {
+            if (hop >= maxRedirects) {
+                print("  Max redirects (" + maxRedirects + ") reached for: " + url);
+                return hop;
+            }
+            if (!staysRelevant) {
+                print("  [PRUNED] off-topic drift after " + hop + " hops: " + url);
+                return hop;
+            }
+            hop = hop + 1;
+        }
+        print("  Redirect chain complete (" + hop + " hops)");
+        return hop;
+    }
+
+    // searchOne — the per-query pipeline: pick strategy, then crawl.
+    void searchOne(String query, int importance, int redirectHops, boolean staysRelevant) {
+        String strat = selectStrategy(importance);
+        print("Query: " + query);
+        print("  strategy=" + strat + " parseDepth=" + parseDepth(strat)
+            + " followLinks=" + followsLinks(strat));
+        fetchWithRedirects("https://search.example/?q=" + query, redirectHops, staysRelevant);
+    }
+
+    void main() {
+        print("=== SearchEngineClient (Sleela edition) ===");
+        // search.importance = 7200 in search-engines.config -> marconi.
+        int importance = 7200;
+        print("configured search.importance=" + importance
+            + " -> " + selectStrategy(importance));
+        print("");
+        searchOne("Tiamat dragon", importance, 2, true);
+        searchOne("Tiamat Enuma Elish", importance, 3, false);
+        searchOne("Tiamat chaos dragon goddess", importance, 15, true);
+    }
+}

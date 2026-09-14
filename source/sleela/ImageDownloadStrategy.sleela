@@ -1,0 +1,126 @@
+#sleela 1.1
+//
+// ImageDownloadStrategy.sleela — Sleela (Wrapper™) port of ImageDownloadStrategy.java.
+// ====================================================================================
+// The image download strategy: score candidates for relevance, then a phased
+// download+validate pipeline (dimensions, file-size bounds, filename derivation,
+// relevance re-check).
+//
+// The Java version uses HttpClient (HEAD/GET, redirects, timeouts), reads image
+// bytes, parses Content-Disposition, and scans strings with String.contains().
+// None of networking, byte I/O, or substring search exists on the Sleela
+// surface, so this port preserves the two computable cores exactly:
+//   1. scoreRelevance(...) — identical weights/boosts/penalties and clamps,
+//      with the detected signals passed in (the Java code derived them by
+//      scanning the url/context; see ImageClassifier.sleela for the same
+//      technique and rationale);
+//   2. passesFilters(...) — the dimension and file-size bound checks from the
+//      download validator, ported as pure integer comparisons.
+// Networking/byte-reading steps are represented as commentary + a validation
+// verdict rather than executed.
+//
+class ImageDownloadStrategy {
+
+    // Config bounds (from search-engines.config image.* settings).
+    int minWidth      = 200;
+    int minHeight     = 200;
+    int minFileSize   = 10000;      // 10 KB
+    int maxFileSize   = 50000000;   // 50 MB
+    int relevanceKeywordCount = 14; // size of the configured keyword list
+
+    double dmin(double a, double b) {
+        if (a < b) {
+            return a;
+        }
+        return b;
+    }
+    double dmax(double a, double b) {
+        if (a > b) {
+            return a;
+        }
+        return b;
+    }
+
+    // scoreRelevance — faithful port of the download-path scorer.
+    // Signals passed in (Java derived them from (url + " " + context)):
+    //   hits            number of configured keywords present
+    //   authoritative   url has marvel.com/marvel.fandom/wikimedia.org/comicvine
+    //   charName        url has captain/marvel/danvers/mar-vell
+    //   stockOrPlaceholder url has shutterstock/gettyimages/istockphoto/dreamstime/123rf/placeholder
+    //   tiny            url has thumb/icon/favicon/avatar/1x1/pixel
+    double scoreRelevance(int hits, boolean authoritative, boolean charName,
+                          boolean stockOrPlaceholder, boolean tiny) {
+        double score = 0.0;
+
+        // Base score from keyword hits:
+        //   min(1.0, hits / max(keywordCount * 0.3, 1))
+        double denom = dmax(relevanceKeywordCount * 0.3, 1.0);
+        score = dmin(1.0, hits / denom);
+
+        // Boost for authoritative domains.
+        if (authoritative) {
+            score = dmin(1.0, score + 0.3);
+        }
+        // Boost for character-name filenames.
+        if (charName) {
+            score = dmin(1.0, score + 0.2);
+        }
+        // Penalty for stock / placeholder domains.
+        if (stockOrPlaceholder) {
+            score = dmax(0.0, score - 0.5);
+        }
+        // Penalty for tiny indicators.
+        if (tiny) {
+            score = dmax(0.0, score - 0.3);
+        }
+
+        return score;
+    }
+
+    // passesFilters — the download validator's dimension + size gate.
+    // Returns true only if the image is large enough and within size bounds.
+    boolean passesFilters(int width, int height, int fileSize) {
+        if (width < minWidth) {
+            return false;
+        }
+        if (height < minHeight) {
+            return false;
+        }
+        if (fileSize < minFileSize) {
+            return false;
+        }
+        if (fileSize > maxFileSize) {
+            return false;
+        }
+        return true;
+    }
+
+    // A single candidate's verdict, combining relevance and the filter gate.
+    void evaluate(String label, double score, double threshold,
+                  int width, int height, int fileSize) {
+        boolean relevant = score >= threshold;
+        boolean passes = passesFilters(width, height, fileSize);
+        String verdict = "REJECT";
+        if (relevant && passes) {
+            verdict = "DOWNLOAD";
+        }
+        print(label + ": score=" + score + " relevant=" + relevant
+            + " passesFilters=" + passes + " -> " + verdict);
+    }
+
+    void main() {
+        print("=== ImageDownloadStrategy (Sleela edition) ===");
+
+        // Strong candidate: 5 hits, authoritative + char name, big image.
+        double s1 = scoreRelevance(5, true, true, false, false);
+        evaluate("candidate-1", s1, 0.3, 1200, 900, 240000);
+
+        // Stock placeholder thumbnail: penalized + too small.
+        double s2 = scoreRelevance(1, false, false, true, true);
+        evaluate("candidate-2", s2, 0.3, 64, 64, 3000);
+
+        // Relevant but oversized (over 50 MB) — fails the size gate.
+        double s3 = scoreRelevance(4, true, true, false, false);
+        evaluate("candidate-3", s3, 0.3, 4000, 3000, 60000000);
+    }
+}

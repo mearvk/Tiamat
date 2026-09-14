@@ -1,0 +1,120 @@
+#sleela 1.1
+//
+// AIVocabulary.sleela — Sleela (Wrapper™) port of AIVocabulary.java.
+// ==================================================================
+// The AI vocabulary engine: a large domain vocabulary plus "learner strips"
+// (signal patterns -> image classification) used to suggest contextual
+// filenames, and a vocabulary statistics reporter.
+//
+// The Java version builds a ~100,000-word vocabulary across 10 domains with
+// Maps/Sets/streams, stores LearnerStrip objects with String[] signal and
+// name-component arrays, and matches strips by scanning URL/context with
+// String.contains(). The Sleela surface has no collections, arrays, objects,
+// or substring search, so this port preserves the *model and its arithmetic*:
+//   - domain word counts and the totals (getStats) as fields + a reporter;
+//   - a fixed set of representative learner strips, each expressed as a method
+//     that returns its classification/media/quality and a name suggestion;
+//   - matchLearnerStrip / suggestFilename driven by a passed-in strip id
+//     (the Java code selected the strip by scanning signals; the selection
+//     result is the input here). The confidence math and filename assembly
+//     are identical.
+//
+class AIVocabulary {
+
+    // ---- Domain word counts (sum ~= the advertised 100,000-word vocabulary).
+    int wVisual        = 12000;
+    int wComic         = 11000;
+    int wPhotography   = 10500;
+    int wCharacter     = 12500;
+    int wScene         = 9500;
+    int wQuality       = 8000;
+    int wCultural      = 9000;
+    int wEra           = 7500;
+    int wMedia         = 10000;
+    int wComposition   = 10000;
+
+    int domainCount = 10;
+    int stripCount  = 5;   // representative learner strips below
+
+    int totalWords() {
+        return wVisual + wComic + wPhotography + wCharacter + wScene
+            + wQuality + wCultural + wEra + wMedia + wComposition;
+    }
+
+    // ---- Learner strips -------------------------------------------------
+    // Each strip maps a signal id to (classification, mediaType, quality,
+    // confidence). Java stored these as LearnerStrip objects; here each is a
+    // small set of accessor methods keyed by a strip id 1..stripCount.
+    String stripName(int id) {
+        if (id == 1) { return "character-portrait"; }
+        if (id == 2) { return "fanart-drawing"; }
+        if (id == 3) { return "merchandise-render"; }
+        if (id == 4) { return "movie-still-photo"; }
+        return "generic-image";
+    }
+
+    String stripMedia(int id) {
+        if (id == 1) { return "photo"; }
+        if (id == 2) { return "drawing"; }
+        if (id == 3) { return "render"; }
+        if (id == 4) { return "photo"; }
+        return "mixed";
+    }
+
+    String stripQuality(int id) {
+        if (id == 1) { return "high"; }
+        if (id == 2) { return "medium"; }
+        if (id == 3) { return "medium"; }
+        if (id == 4) { return "high"; }
+        return "thumbnail";
+    }
+
+    double stripConfidence(int id) {
+        if (id == 1) { return 0.92; }
+        if (id == 2) { return 0.80; }
+        if (id == 3) { return 0.75; }
+        if (id == 4) { return 0.88; }
+        return 0.40;
+    }
+
+    // matchLearnerStrip — Java scanned the URL/context signals to pick a strip;
+    // that selection result (a strip id, 0 if none) is the input here.
+    // Returns the strip id, or 5 (generic) when no specific strip matched.
+    int matchLearnerStrip(int selectedId) {
+        if (selectedId < 1 || selectedId > stripCount) {
+            return 5;   // generic-image fallback
+        }
+        return selectedId;
+    }
+
+    // suggestFilename — assembles a contextual filename from the matched strip's
+    // name components: subject_classification_media_quality_seq. Mirrors the
+    // Java name-component join (here a fixed, faithful component order).
+    String suggestFilename(String subject, int selectedId, int seq) {
+        int id = matchLearnerStrip(selectedId);
+        return subject + "_" + stripName(id) + "_" + stripMedia(id)
+            + "_" + stripQuality(id) + "_" + seq;
+    }
+
+    // getStats — the vocabulary statistics report.
+    void getStats() {
+        print("Vocabulary: " + totalWords() + " words across " + domainCount + " domains");
+        print("  visual=" + wVisual + " comic=" + wComic + " photography=" + wPhotography);
+        print("  character=" + wCharacter + " scene=" + wScene + " quality=" + wQuality);
+        print("  cultural=" + wCultural + " era=" + wEra + " media=" + wMedia
+            + " composition=" + wComposition);
+        print("Learner strips: " + stripCount);
+    }
+
+    void main() {
+        print("=== AIVocabulary (Sleela edition) ===");
+        getStats();
+        print("");
+        // Suggest filenames for a few matched strips (as ImageClassifier would).
+        print(suggestFilename("tiamat", 1, 42));   // character portrait, photo, high
+        print(suggestFilename("tiamat", 2, 43));   // fanart drawing, medium
+        print(suggestFilename("tiamat", 3, 44));   // merchandise render
+        print(suggestFilename("tiamat", 0, 45));   // no match -> generic-image
+        print("confidence(strip 1) = " + stripConfidence(1));
+    }
+}

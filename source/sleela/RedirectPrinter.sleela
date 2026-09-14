@@ -1,0 +1,76 @@
+#sleela 1.1
+//
+// RedirectPrinter.sleela — Sleela (Wrapper™) port of RedirectPrinter.java.
+// ========================================================================
+// Prints redirect-chain events in the CommonRails component format. The Java
+// version delegates to CommonRails.printSystemComponent(this, hash, msg); the
+// Sleela surface has no cross-class calls or object identity, so each printer
+// method formats the same "-- : ... . message ." line inline (mirroring
+// CommonRails.sleela's printComponent) and emits it with print(...).
+//
+class RedirectPrinter {
+
+    // A stand-in object id for the [Object ID: ...] field (Java used hashCode()).
+    int hash = 7134;
+
+    String repeat(String s, int n) {
+        String out = "";
+        int i = 0;
+        while (i < n) {
+            out = out + s;
+            i = i + 1;
+        }
+        return out;
+    }
+
+    int digitCount(int v) {
+        int n = v;
+        if (n < 0) {
+            n = -n;
+        }
+        int count = 1;
+        while (n >= 10) {
+            n = n / 10;
+            count = count + 1;
+        }
+        return count;
+    }
+
+    String padZeros(int value, int width) {
+        int need = width - digitCount(value);
+        if (need <= 0) {
+            return "" + value;
+        }
+        return repeat("0", need) + value;
+    }
+
+    // -- : [Object ID: 0000007134] [Current: @RedirectPrinter] . message .
+    void component(String message) {
+        print("-- : [Object ID: " + padZeros(hash, 10) + "] "
+            + "[Current: @RedirectPrinter] . " + message + " .");
+    }
+
+    void printHop(int count, int status, String from, String to) {
+        component("Redirect #" + count + " [" + status + "] " + from + " -> " + to);
+    }
+
+    void printComplete(int hops) {
+        component("Redirect chain complete (" + hops + " hops)");
+    }
+
+    void printPruned(String reason, int hops, String url) {
+        component("[PRUNED] " + reason + " after " + hops + " hops: " + url);
+    }
+
+    void printMaxReached(int max, String url) {
+        component("Max redirects (" + max + ") reached for: " + url);
+    }
+
+    void main() {
+        printHop(1, 302, "http://a.example", "http://b.example");
+        printHop(2, 301, "http://b.example", "http://c.example");
+        printComplete(2);
+        printPruned("off-topic drift", 3, "http://d.example");
+        printMaxReached(10, "http://loop.example");
+    }
+}

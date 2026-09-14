@@ -1,0 +1,107 @@
+#sleela 1.1
+//
+// PagePrinter.sleela — Sleela (Wrapper™) port of PagePrinter.java.
+// ================================================================
+// Prints page-content summaries and image diagnostics in the CommonRails
+// component format. The Java version delegates to
+// CommonRails.printSystemComponent(...) and colors the yield line with ANSI
+// escapes (green/yellow/red by yield tier). The Sleela surface has no
+// cross-class calls or ANSI escapes, so each line is formatted inline and the
+// color tier is rendered as a text label (GOOD / MODERATE / POOR).
+//
+class PagePrinter {
+
+    int hash = 5521;
+
+    String repeat(String s, int n) {
+        String out = "";
+        int i = 0;
+        while (i < n) {
+            out = out + s;
+            i = i + 1;
+        }
+        return out;
+    }
+
+    int digitCount(int v) {
+        int n = v;
+        if (n < 0) {
+            n = -n;
+        }
+        int count = 1;
+        while (n >= 10) {
+            n = n / 10;
+            count = count + 1;
+        }
+        return count;
+    }
+
+    String padZeros(int value, int width) {
+        int need = width - digitCount(value);
+        if (need <= 0) {
+            return "" + value;
+        }
+        return repeat("0", need) + value;
+    }
+
+    void component(String message) {
+        print("-- : [Object ID: " + padZeros(hash, 10) + "] "
+            + "[Current: @PagePrinter] . " + message + " .");
+    }
+
+    // printSummary — only prints when the page yielded at least one artifact.
+    void printSummary(String url, int audio, int images, int files) {
+        if (audio + images + files > 0) {
+            component("Page: " + url + " | audio=" + audio
+                + " images=" + images + " files=" + files);
+        }
+    }
+
+    // yield tier label — replaces the ANSI color choice in the Java version.
+    // pct >= 70 -> GOOD ; pct >= 30 -> MODERATE ; else POOR.
+    String yieldTier(double pct) {
+        if (pct >= 70.0) {
+            return "GOOD";
+        }
+        if (pct >= 30.0) {
+            return "MODERATE";
+        }
+        return "POOR";
+    }
+
+    // printImageDiagnostic — mirrors the Java method: header line, a tiered
+    // yield summary, and the missed breakdown when yield is below 70%.
+    void printImageDiagnostic(String url, int extracted, int total,
+                              int missedTotal) {
+        double pct = 0.0;
+        if (total > 0) {
+            pct = (extracted * 100.0) / total;
+        }
+        component("[IMAGE DIAG] " + url);
+        component("  [" + yieldTier(pct) + "] YIELD: " + extracted + "/"
+            + total + " (" + pct + "%)");
+        if (pct < 70.0 && missedTotal > 0) {
+            component("  MISSED: " + missedTotal + " images not captured");
+        }
+    }
+
+    void printSkip(String path) {
+        component("[SKIP] Already exists: " + path);
+    }
+
+    void printSuccess(String path, int bytes) {
+        component("[SUCCESS] " + path + " (" + bytes + " bytes)");
+    }
+
+    void printFailed(String reason) {
+        component("[FAILED] " + reason);
+    }
+
+    void main() {
+        printSummary("https://site.example/gallery", 0, 12, 3);
+        printImageDiagnostic("https://site.example/gallery", 14, 26, 12);
+        printSkip("photos/14-09-2026/img_0001.jpg");
+        printSuccess("photos/14-09-2026/img_0002.jpg", 48213);
+        printFailed("connection timeout");
+    }
+}

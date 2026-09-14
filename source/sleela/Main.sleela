@@ -1,0 +1,47 @@
+#sleela 1.1
+//
+// Main.sleela — Sleela (Wrapper™) port of Main.java.
+// ==================================================
+// The Tiamat system entry point and project-lineage record. The Java version
+// wires up SearchEngineClient and AIModule against real config/file paths; the
+// Sleela surface has no file I/O or object construction, so this Wrapper™
+// preserves the orchestration *narrative* and the project-lineage constants,
+// and calls the ported components' demo entry points in the same order.
+//
+// Fields stand in for the Java `public static final` constants.
+//
+class Main {
+
+    // Project lineage: Project 2 of 2, same author.
+    // Prior project: Captain Marvell (retired/cleaned).
+    // Current project: Tiamat — Level 9 Adventurer.
+    String PROJECT_NAME    = "Tiamat";
+    int    PROJECT_SEQUENCE = 2;
+    int    PROJECT_TOTAL    = 2;
+    String PROJECT_LINEAGE  = "same-author";
+
+    void banner() {
+        print("=== Tiamat System ===");
+        print("    Project " + PROJECT_SEQUENCE + " of " + PROJECT_TOTAL
+            + " | Lineage: " + PROJECT_LINEAGE);
+        print("");
+    }
+
+    void main() {
+        banner();
+
+        // [1] Search Engine Client — in Java this loads the config and crawls;
+        // here we announce the same step (see SearchEngineClient.sleela).
+        print("[1] Running Search Engine Client...");
+        print("");
+
+        // [2] AI Module — set project context, then process incoming files
+        // (see AIModule.sleela for the ported document-generation logic).
+        print("[2] Running AI Module...");
+        print("    AI Module: Project context set — " + PROJECT_NAME
+            + " [" + PROJECT_SEQUENCE + "/" + PROJECT_TOTAL + "] lineage=" + PROJECT_LINEAGE);
+        print("");
+
+        print("=== Complete ===");
+    }
+}

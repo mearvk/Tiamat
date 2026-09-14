@@ -1,0 +1,125 @@
+#sleela 1.1
+//
+// PageImageDiagnostic.sleela — Sleela (Wrapper™) port of PageImageDiagnostic.java.
+// ===============================================================================
+// Diagnostic data for image-yield analysis on a single page: what the page
+// contains (raw HTML counts) vs. what we extracted, and why the gap exists.
+//
+// The Java class is a mutable data holder with List<String> sample fields and
+// String.format(...) rendering. The Sleela surface has no collections or
+// printf, so:
+//   - the counters become class fields (shared state);
+//   - the two sample-URL lists collapse to single `sampleNoExtension` /
+//     `sampleNotCaptured` String fields (one representative each);
+//   - yieldPercent() is ported exactly as double arithmetic;
+//   - summary() / missedBreakdown() are ported as print routines instead of
+//     returning a formatted String (no StringBuilder on the surface).
+//
+class PageImageDiagnostic {
+
+    // --- What the page contains (raw HTML counts) ---
+    int totalImgTags        = 0;   // <img> elements
+    int totalImageHrefs     = 0;   // <a href="*.jpg|png|...">
+    int totalCssBackgrounds = 0;   // background-image: url(...)
+    int totalLazyLoad       = 0;   // data-src attributes
+    int totalSrcset         = 0;   // srcset attributes
+    int totalMetaImages     = 0;   // og:image, twitter:image
+    int totalOnPage         = 0;   // sum of all above
+
+    // --- What we extracted ---
+    int extractedCount    = 0;     // images that passed through our pipeline
+    int confirmedCaptured = 0;     // img src values confirmed in the extracted set
+
+    // --- Why images are missing ---
+    int missedTotal            = 0;   // totalOnPage - extractedCount
+    int missedReasonDataUri    = 0;   // data: URIs (inline base64)
+    int missedReasonJavascript = 0;   // javascript: pseudo-URLs
+    int missedReasonBlankSrc   = 0;   // empty or null src
+    int missedReasonNoExtension = 0;  // no image file extension (dynamic URL)
+    int missedReasonNotCaptured = 0;  // has extension but didn't make the pipeline
+
+    // Sample URLs for debugging (single representative each; Java used Lists).
+    String sampleNoExtension = "";
+    String sampleNotCaptured = "";
+
+    // yield percentage (extracted / total on page). Ported exactly.
+    double yieldPercent() {
+        if (totalOnPage == 0) {
+            return 0.0;
+        }
+        return (extractedCount * 100.0) / totalOnPage;
+    }
+
+    // summary() — compact one-line summary (printed rather than returned).
+    void printSummary() {
+        print("YIELD: " + extractedCount + "/" + totalOnPage
+            + " (" + yieldPercent() + "%)"
+            + " | img=" + totalImgTags + " href=" + totalImageHrefs
+            + " css=" + totalCssBackgrounds + " lazy=" + totalLazyLoad
+            + " srcset=" + totalSrcset + " meta=" + totalMetaImages);
+    }
+
+    // missedBreakdown() — detailed breakdown of missed images (printed).
+    void printMissedBreakdown() {
+        if (missedTotal <= 0) {
+            print("No missed images.");
+            return;
+        }
+        print("MISSED: " + missedTotal + " images not captured");
+        if (missedReasonDataUri > 0) {
+            print("    data: URIs (base64 inline):   " + missedReasonDataUri);
+        }
+        if (missedReasonJavascript > 0) {
+            print("    javascript: pseudo-URLs:      " + missedReasonJavascript);
+        }
+        if (missedReasonBlankSrc > 0) {
+            print("    blank/empty src:              " + missedReasonBlankSrc);
+        }
+        if (missedReasonNoExtension > 0) {
+            print("    no image extension (dynamic): " + missedReasonNoExtension);
+            if (sampleNoExtension != "") {
+                print("      e.g. " + sampleNoExtension);
+            }
+        }
+        if (missedReasonNotCaptured > 0) {
+            print("    has extension, not captured:  " + missedReasonNotCaptured);
+            if (sampleNotCaptured != "") {
+                print("      e.g. " + sampleNotCaptured);
+            }
+        }
+    }
+
+    // recompute the derived totals from the raw counts (Java set these directly).
+    void recompute() {
+        totalOnPage = totalImgTags + totalImageHrefs + totalCssBackgrounds
+            + totalLazyLoad + totalSrcset + totalMetaImages;
+        missedTotal = totalOnPage - extractedCount;
+        if (missedTotal < 0) {
+            missedTotal = 0;
+        }
+    }
+
+    void main() {
+        // A worked example mirroring a real page diagnostic.
+        totalImgTags = 20;
+        totalImageHrefs = 6;
+        totalCssBackgrounds = 3;
+        totalLazyLoad = 8;
+        totalSrcset = 2;
+        totalMetaImages = 1;
+        extractedCount = 14;
+
+        missedReasonDataUri = 4;
+        missedReasonJavascript = 1;
+        missedReasonNoExtension = 9;
+        sampleNoExtension = "https://cdn.example/dyn?id=42";
+        missedReasonNotCaptured = 2;
+        sampleNotCaptured = "https://img.example/photo.jpg";
+
+        recompute();
+
+        print("=== PageImageDiagnostic (Sleela edition) ===");
+        printSummary();
+        printMissedBreakdown();
+    }
+}
