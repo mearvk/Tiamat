@@ -69,16 +69,16 @@
         <reset-after-line>true</reset-after-line>
     </control>
 
-    <!-- SQUARE PROGRESS — 10x10 grid fill indicator for downloads -->
+    <!-- SQUARE PROGRESS — 21x21 grid fill indicator for downloads -->
     <!--
       Fill order: bottom-right → left across row, then up one row.
-      100 cells total = 1% each. Target fill time ≤2000ms for ~1MB downloads.
+      441 cells total (21x21) ≈ 0.227% each. Target fill time ≤2000ms for ~1MB downloads.
       Filled cells: orange █ (ANSI 208) — hardcoded in CommonRails.java
       Empty cells: white █ (ANSI 255) — hardcoded in CommonRails.java
       Colors use actual escape sequences and cannot be stored in XML.
     -->
     <square-progress>
-        <size>10</size>
+        <size>21</size>
         <filled-char>█</filled-char>
         <empty-char>█</empty-char>
         <target-fill-ms>2000</target-fill-ms>

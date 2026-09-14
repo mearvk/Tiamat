@@ -16,8 +16,8 @@ public class CommonRails
     private static final int LINE_WIDTH = 120;
     private static final String RESET = "\u001B[0m";
 
-    // 10x10 square progress config
-    private static int SQUARE_SIZE = 10;
+    // 21x21 square progress config
+    private static int SQUARE_SIZE = 21;
     private static String SQUARE_FILLED_CHAR = "\u2588";  // █ full block
     private static String SQUARE_EMPTY_CHAR = "\u2588";   // █ full block (white colored)
     private static final String SQUARE_FILLED_ESC = "\u001b[38;5;208m";  // orange
@@ -205,9 +205,9 @@ public class CommonRails
         int totalCells = SQUARE_SIZE * SQUARE_SIZE;
         int filledCells = (clamped * totalCells) / 100;
 
-        // Build 10x10 square as a single-line compact representation
-        // Each row is 10 block chars separated by pipe, fill order: bottom-right → left, then up
-        // Rendered as: [row0|row1|row2|...|row9] where each row is 10 chars
+        // Build 21x21 square as a single-line compact representation
+        // Each row is 21 block chars separated by pipe, fill order: bottom-right → left, then up
+        // Rendered as: [row0|row1|row2|...|row20] where each row is 21 chars
         StringBuilder square = new StringBuilder();
         square.append("[");
         for (int displayRow = 0; displayRow < SQUARE_SIZE; displayRow++)
@@ -250,13 +250,13 @@ public class CommonRails
     }
 
     // =========================================================================
-    // 10x10 SQUARE PROGRESS INDICATOR
+    // 21x21 SQUARE PROGRESS INDICATOR
     // Fills from bottom-right to left, then up one row at a time.
-    // 100 cells = 100%. Target fill: ≤2 seconds for a ~1MB image download.
+    // 441 cells = 100%. Target fill: ≤2 seconds for a ~1MB image download.
     // =========================================================================
 
     /**
-     * Renders a 10x10 grid progress indicator (standalone multi-line version).
+     * Renders a 21x21 grid progress indicator (standalone multi-line version).
      * Fill order: bottom-right → left across row, then up to next row.
      * Each cell = 1%. At 100%, the full square is filled orange on white.
      *
@@ -333,7 +333,7 @@ public class CommonRails
 
     /**
      * Returns the per-cell delay in ms to hit the target fill time.
-     * For a 10x10 grid (100 cells) at 2000ms target = 20ms per cell.
+     * For a 21x21 grid (441 cells) at 2000ms target ≈ 4ms per cell.
      */
     public static int getSquareCellDelayMs()
     {
