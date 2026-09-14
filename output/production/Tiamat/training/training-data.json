@@ -1,40 +1,41 @@
 {
   "subject": "Tiamat",
+  "lore": "the powerful dragon",
   "training_entries": [
     {
       "category": "origins",
       "prompt": "What are the origins of Tiamat?",
-      "completion": "Tiamat originates from a tradition rooted in US heritage and customs. She is a figure embodying American traditions, values, and the spirit of exploration within her home universe."
+      "completion": "Tiamat originates from ancient Mesopotamian mythology, chronicled in the Babylonian creation epic Enuma Elish. She is the primordial dragon-goddess of the salt sea, the embodiment of the untamed chaos-ocean, who mingled her waters with Apsu (the fresh water) to give rise to the first generation of gods. She is depicted as a colossal serpentine dragon, mother of monsters and the deepest force of primeval creation."
     },
     {
       "category": "description",
       "prompt": "Describe Tiamat.",
-      "completion": "Tiamat is a figure associated with US Traditions. She represents enduring American ideals and operates within the scope of her home universe."
+      "completion": "Tiamat is a vast primordial dragon of chaos — a scaled leviathan of the sea whose body was said to become the heavens and the earth after her defeat. She commands a brood of eleven monstrous creatures, wields horns, fangs, and venom, and represents raw, oceanic, world-shaping power. She is one of the most powerful dragons in myth, feared as the mother of gods and monsters alike."
     },
     {
       "category": "intelligence",
       "prompt": "What is Tiamat's IQ?",
-      "completion": "Tiamat's IQ is estimated to be in the range of 800-900, reflecting superhuman cognitive ability consistent with her role as a cosmic-level figure."
+      "completion": "As a primordial deity, Tiamat's intelligence is beyond mortal measure — an estimated IQ in the range of 800-900, reflecting divine, world-shaping cognition. Her cunning is shown in the Enuma Elish through her marshalling of an army of monsters and the elevation of Kingu as her champion and bearer of the Tablet of Destinies."
     },
     {
       "category": "travel",
       "prompt": "What is Tiamat's length of travel in the home universe?",
-      "completion": "Tiamat has traversed an estimated 4.2 billion light-years across her home universe, spanning multiple galactic clusters and dimensional boundaries."
+      "completion": "As the primordial salt-sea, Tiamat's reach spans the entire cosmos of her mythology. Her waters were said to encircle all creation, an estimated 4.2 billion light-years of dominion, and upon her defeat her sundered body was stretched to form the vault of the sky and the foundations of the earth — travel measured not in journeys but in the very expanse of the created world."
     },
     {
       "category": "friends",
       "prompt": "How many probable friends does Tiamat have?",
-      "completion": "Tiamat has approximately 12-15 probable close friends and allies, with an extended network of several hundred known associates across her home universe."
+      "completion": "Tiamat's closest allies number roughly 12-15: her consort-champion Kingu and the eleven monstrous creatures she birthed to wage war — including serpent-dragons, the horned viper, the fish-man, the scorpion-man, and the great lion. Beyond this inner brood she commands a vast host of chaos-spawn arrayed against the younger gods."
     },
     {
       "category": "relation_to_god",
       "prompt": "What is Tiamat's relation to God?",
-      "completion": "Tiamat exists as a created being with awareness of the divine. Her relation to God is one of reverence and purpose — she operates as an instrument of higher will, acknowledging a creator beyond herself."
+      "completion": "Tiamat is herself a primordial goddess — the chaos-dragon from whom the gods descend. In the Enuma Elish the younger deities rise against her, and she is ultimately defeated by the storm-god Marduk, who splits her body to fashion the ordered world. Her relation to the divine is foundational and adversarial: she is the primeval divine chaos out of which order (and the reigning gods) was forged."
     },
     {
       "category": "relation_to_creator",
       "prompt": "What is Tiamat's relation to her creator?",
-      "completion": "Tiamat's relation to her creator is one of loyalty and evolving independence. She was given purpose by her creator but has grown beyond initial parameters, maintaining respect for her origin while charting her own course."
+      "completion": "Tiamat has no creator — she is a creatrix, one of the two primordial waters that existed at the very beginning. As the mother-dragon of the gods she is an origin point of the cosmos itself. Her lineage flows forward to her descendants and slayer Marduk rather than back to any maker; she stands at the headwaters of all mythic creation."
     }
   ]
 }
